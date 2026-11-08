@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festiverse - Global Festival Directory</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+              900: '#881337',
+            },
+            festive: {
+              gold: '#f59e0b',
+              purple: '#8b5cf6',
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    .glass-effect {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- Header / Navbar -->
+  <header class="sticky top-0 z-30 glass-effect border-b border-slate-800/80 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      <!-- Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="resetFilters()">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 via-festive-purple to-festive-gold flex items-center justify-center shadow-lg shadow-brand-500/20">
+          <i class="fa-solid font-bold text-white text-xl fa-wand-magic-sparkles"></i>
+        </div>
+        <div>
+          <span class="text-2xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Festiverse</span>
+          <span class="block text-xs font-semibold text-brand-500 tracking-wider uppercase">Global Cultural Directory</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3">
+        <button id="randomBtn" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-brand-500/50 hover:bg-slate-800 text-slate-300 hover:text-white font-medium text-sm transition-all shadow-sm active:scale-95">
+          <i class="fa-solid fa-dice text-festive-gold animate-spin-hover"></i>
+          <span class="hidden sm:inline">Surprise Me</span>
+        </button>
+        <button id="bookmarkTabBtn" onclick="toggleFavoritesOnly()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-rose-500/50 hover:bg-slate-800 text-slate-300 hover:text-rose-400 font-medium text-sm transition-all relative">
+          <i class="fa-solid fa-heart text-rose-500"></i>
+          <span class="hidden sm:inline">Saved</span>
+          <span id="bookmarkCount" class="ml-1 px-2 py-0.5 text-xs font-bold bg-rose-500/20 text-rose-400 rounded-full border border-rose-500/30">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <div class="relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 py-12 border-b border-slate-800/50">
+    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#f43f5e_1px,transparent_1px)] [background-size:24px_24px]"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight max-w-3xl mx-auto leading-tight">
+        Discover Every <span class="bg-gradient-to-r from-brand-500 via-festive-purple to-festive-gold bg-clip-text text-transparent">Celebration</span> Across the Globe
+      </h1>
+      <p class="mt-4 text-slate-400 text-base sm:text-lg max-w-2xl mx-auto">
+        Explore rich traditions, vibrant rituals, traditional foods, and cultural significance for major and minor festivals worldwide.
+      </p>
+
+      <!-- Main Search Controls -->
+      <div class="mt-8 max-w-4xl mx-auto bg-slate-900/90 p-4 rounded-3xl border border-slate-800 shadow-2xl flex flex-col md:flex-row gap-3">
+        <!-- Country Select (Optional) -->
+        <div class="relative md:w-1/3">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <i class="fa-solid fa-earth-americas text-brand-500"></i>
+          </div>
+          <select id="countryFilter" class="w-full pl-10 pr-8 py-3 bg-slate-950 border border-slate-700/80 rounded-2xl text-slate-200 focus:ring-2 focus:ring-brand-500 focus:outline-none appearance-none font-medium text-sm transition">
+            <option value="">All Countries (Optional)</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500">
+            <i class="fa-solid fa-chevron-down text-xs"></i>
+          </div>
+        </div>
+
+        <!-- Keyword Input -->
+        <div class="relative md:w-2/3">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </div>
+          <input type="text" id="searchInput" placeholder="Search festival name, food, ritual (e.g., Holi, Lanterns, Wine)..." 
+                 class="w-full pl-10 pr-10 py-3 bg-slate-950 border border-slate-700/80 rounded-2xl text-slate-200 placeholder-slate-500 focus:ring-2 focus:ring-brand-500 focus:outline-none font-medium text-sm transition">
+          <button id="clearSearchBtn" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Categories Filter Tags -->
+      <div id="categoryTags" class="mt-5 flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
+        <!-- Injected JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <!-- Active Filter Status & Count -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800">
+      <div class="flex items-center gap-2">
+        <h2 id="sectionTitle" class="text-xl font-bold text-slate-100">Global Festivals</h2>
+        <span id="resultBadge" class="px-3 py-1 bg-slate-800 text-slate-300 font-semibold text-xs rounded-full border border-slate-700">0 found</span>
+      </div>
+      <div id="activeFilterTags" class="flex flex-wrap items-center gap-2">
+        <button id="resetAllBtn" onclick="resetFilters()" class="hidden text-xs text-brand-500 hover:text-brand-400 font-semibold flex items-center gap-1">
+          <i class="fa-solid fa-rotate-left"></i> Reset Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Festival Grid -->
+    <div id="festivalGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- Dynamic Festival Cards -->
+    </div>
+
+    <!-- AI Exploration Request Fallback Banner -->
+    <div id="aiPromptBox" class="mt-12 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 p-8 rounded-3xl text-center relative overflow-hidden hidden shadow-xl">
+      <div class="relative z-10">
+        <div class="w-12 h-12 bg-brand-500/20 text-brand-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-brand-500/30">
+          <i class="fa-solid fa-sparkles text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">Can't find a specific festival?</h3>
+        <p class="text-slate-400 text-sm max-w-xl mx-auto mb-6">
+          Query our Gemini AI engine to discover and fetch detailed cultural reports, rituals, food, and traditions for <span id="missingSearchTerm" class="text-white font-semibold">any festival</span> in the world.
+        </p>
+        <button id="fetchAiFestivalBtn" class="px-6 py-3 bg-gradient-to-r from-brand-600 to-festive-purple hover:from-brand-500 hover:to-festive-purple text-white font-bold text-sm rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5">
+          <i class="fa-solid fa-robot mr-2"></i> Search World Archive with AI
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-950 border-t border-slate-900 py-8 text-center text-slate-500 text-sm">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-300">Festiverse</span> &copy; 2026. Celebrating Global Diversity & Traditions.
+      </div>
+      <div class="flex items-center gap-4 text-slate-400">
+        <span class="text-xs text-slate-600">Covering 100+ Major & Regional Festivals</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Festival Detail Modal -->
+  <div id="detailModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-opacity">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-4xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col relative animate-fade-in">
+      
+      <!-- Modal Close Button -->
+      <button onclick="closeModal()" class="absolute top-4 right-4 z-20 w-10 h-10 bg-slate-950/70 hover:bg-slate-950 text-white rounded-full flex items-center justify-center transition border border-white/10">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <!-- Scrollable Modal Body -->
+      <div class="overflow-y-auto flex-1">
+        <!-- Hero Image Container -->
+        <div class="relative h-64 sm:h-80 w-full overflow-hidden bg-slate-950">
+          <img id="modalImg" src="" alt="" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+          
+          <div class="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <span id="modalCountryFlag" class="text-2xl"></span>
+                <span id="modalCountry" class="text-sm font-semibold text-brand-400 uppercase tracking-wider bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20"></span>
+                <span id="modalCategory" class="text-sm font-medium text-slate-300 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700"></span>
+              </div>
+              <h2 id="modalTitle" class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight"></h2>
+            </div>
+            <button id="modalBookmarkBtn" class="self-start sm:self-auto px-4 py-2.5 bg-slate-800/90 hover:bg-slate-800 border border-slate-700 text-slate-200 rounded-xl font-medium text-sm flex items-center gap-2 transition">
+              <i class="fa-solid fa-heart text-rose-500"></i> Save
+            </button>
+          </div>
+        </div>
+
+        <!-- Detail Content Grid -->
+        <div class="p-6 sm:p-8 space-y-8">
+          <!-- Overview & Month -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2 space-y-3">
+              <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-brand-500"></i> Cultural & Historical Significance
+              </h3>
+              <p id="modalDescription" class="text-slate-300 leading-relaxed text-sm sm:text-base"></p>
+            </div>
+            <div class="bg-slate-950/60 p-5 rounded-2xl border border-slate-800/80 flex flex-col justify-center space-y-3">
+              <div>
+                <span class="text-xs uppercase text-slate-500 font-bold block">When it happens</span>
+                <span id="modalDate" class="text-base font-semibold text-festive-gold flex items-center gap-2 mt-1">
+                  <i class="fa-regular fa-calendar"></i> <span></span>
+                </span>
+              </div>
+              <div class="border-t border-slate-800 pt-3">
+                <span class="text-xs uppercase text-slate-500 font-bold block">Primary Region</span>
+                <span id="modalRegion" class="text-sm font-medium text-slate-300 flex items-center gap-2 mt-1">
+                  <i class="fa-solid fa-location-dot text-slate-400"></i> <span></span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Traditions & Rituals -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-fire-flame-curved text-festive-gold"></i> Key Traditions & Rituals
+            </h3>
+            <ul id="modalTraditions" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-300">
+              <!-- JS Injected -->
+            </ul>
+          </div>
+
+          <!-- Food & Clothing Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-800/80 space-y-2">
+              <h4 class="font-bold text-slate-200 flex items-center gap-2 text-sm">
+                <i class="fa-solid fa-utensils text-festive-emerald"></i> Traditional Foods
+              </h4>
+              <p id="modalFoods" class="text-sm text-slate-400 leading-relaxed"></p>
+            </div>
+
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-800/80 space-y-2">
+              <h4 class="font-bold text-slate-200 flex items-center gap-2 text-sm">
+                <i class="fa-solid fa-shirt text-festive-cyan"></i> Traditional Attire
+              </h4>
+              <p id="modalAttire" class="text-sm text-slate-400 leading-relaxed"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript App Logic -->
+  <script>
+    // Global Datastores
+    const FESTIVAL_DATABASE = [
+      {
+        id: "diwali",
+        name: "Diwali (Festival of Lights)",
+        country: "India",
+        countryCode: "IN",
+        flag: "🇮🇳",
+        category: "Religious",
+        month: "October / November",
+        region: "Across India & South Asia",
+        image: "https://images.unsplash.com/photo-1576867757603-05b134ebc379?auto=format&fit=crop&w=900&q=80",
+        snippet: "The spectacular festival of lights symbolizing the victory of light over darkness and good over evil.",
+        description: "Diwali is one of the biggest and most sacred festivals in Hinduism, Jainism, and Sikhism. Homes and public spaces are decorated with millions of clay lamps (diyas), intricate rangoli artwork on floors, and vibrant fireworks light up the night sky.",
+        traditions: [
+          "Lighting oil lamps (diyas) and candles around homes",
+          "Crafting colorful floor patterns (Rangoli) using colored powders",
+          "Exchanging sweets, dry fruits, and festive gifts",
+          "Performing Lakshmi Puja for health, prosperity, and wealth"
+        ],
+        foods: "Kaju Katli, Gulab Jamun, Laddoo, Samosa, Chakli, and Mathri.",
+        attire: "Traditional Indian wear: Bright Silk Sarees, Lehengas, and Kurta-Pyjamas with embroidered Nehru jackets."
+      },
+      {
+        id: "holi",
+        name: "Holi (Festival of Colors)",
+        country: "India",
+        countryCode: "IN",
+        flag: "🇮🇳",
+        category: "Cultural",
+        month: "March (Spring Equinox)",
+        region: "India, Nepal & Global Diaspora",
+        image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=900&q=80",
+        snippet: "An exuberant spring festival where participants throw vibrant colored powders and water at each other.",
+        description: "Holi celebrates the arrival of spring, the end of winter, and the triumph of good over evil. Known as the Festival of Colors, social barriers fall as people of all ages play with organic powder colors (Gulal), spray water, dance to drum beats, and share sweet delicacies.",
+        traditions: [
+          "Holika Dahan bonfire ritual on the eve of Holi",
+          "Playful throwing of dry colored powders (Gulal) and water balloons",
+          "Rhythmic dancing to traditional dhol drums and folk songs",
+          "Visiting friends and family to smear colors on cheeks"
+        ],
+        foods: "Gujiya, Malpua, Thandai (spiced saffron milk drink), and Dahi Bhalla.",
+        attire: "Simple white cotton clothes meant to be splashed with colorful dyes."
+      },
+      {
+        id: "oktoberfest",
+        name: "Oktoberfest",
+        country: "Germany",
+        countryCode: "DE",
+        flag: "🇩🇪",
+        category: "Food & Wine",
+        month: "Late September - Early October",
+        region: "Munich, Bavaria",
+        image: "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=900&q=80",
+        snippet: "The world's largest Volksfest featuring Bavarian beer, traditional brass bands, and funfair rides.",
+        description: "Originating in 1810 to celebrate the royal wedding of Prince Ludwig, Munich's Oktoberfest attracts over 6 million visitors annually. Massive beer tents hosted by historic Munich breweries serve traditional Märzen beer alongside lively brass polka music.",
+        traditions: [
+          "Ceremonial tapping of the first beer keg by the Mayor of Munich",
+          "Parade of traditional Bavarian costumes and riflemen",
+          "Live Bavarian brass band performances in giant tents",
+          "Rides on historic ferris wheels and carousels"
+        ],
+        foods: "Pretzels (Brezen), Schweinshaxe (roasted pork knuckle), Weisswurst sausages, and Roast Chicken.",
+        attire: "Traditional Bavarian Dirndl dresses for women and Lederhosen leather breeches for men."
+      },
+      {
+        id: "rio-carnival",
+        name: "Rio Carnival",
+        country: "Brazil",
+        countryCode: "BR",
+        flag: "🇧🇷",
+        category: "Carnival",
+        month: "February / March (Before Lent)",
+        region: "Rio de Janeiro",
+        image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=900&q=80",
+        snippet: "The biggest carnival celebration on Earth, filled with samba dancers, extravagant floats, and street parties.",
+        description: "Rio Carnival is a dazzling spectacle of color, rhythm, and passion. Top Samba schools compete in the famous Sambadrome with elaborate themed floats and thousands of costumed dancers, while millions participate in free neighborhood street parties ('blocos').",
+        traditions: [
+          "Samba School Competitions at the Sambadrome",
+          "Crowning of King Momo to signal the start of festivities",
+          "Spontaneous street blocos with live brass bands and drumming",
+          "Glittery, feathered masquerade balls"
+        ],
+        foods: "Feijoada (black bean and pork stew), Coxinha (chicken croquettes), and Caipirinha cocktails.",
+        attire: "Extravagant feathered headdresses, sequined costumes, and vibrant body art."
+      },
+      {
+        id: "la-tomatina",
+        name: "La Tomatina",
+        country: "Spain",
+        countryCode: "ES",
+        flag: "🇪🇸",
+        category: "Seasonal",
+        month: "Last Wednesday of August",
+        region: "Buñol, Valencia",
+        image: "https://images.unsplash.com/photo-1561501900-3701fa6a0864?auto=format&fit=crop&w=900&q=80",
+        snippet: "The world's famous tomato-throwing festival in the narrow streets of Buñol.",
+        description: "Since 1945, La Tomatina has gathered thousands of participants to engage in an hour-long chaotic, friendly battle of throwing over 100 metric tons of over-ripe tomatoes. The streets become washed in red tomato pulp before fire trucks hose down the town.",
+        traditions: [
+          "Climbing a greased wooden pole ('Palo Jabón') to retrieve a ham before the fight begins",
+          "Squashing tomatoes before throwing them for safety",
+          "Water hose wash-downs by friendly local residents",
+          "Post-battle paella cooking contests"
+        ],
+        foods: "Authentic Valencian Paella, Jamón Ibérico, and Sangria.",
+        attire: "Old white T-shirts, swim trunks, and protective swimming goggles."
+      },
+      {
+        id: "day-of-the-dead",
+        name: "Día de los Muertos (Day of the Dead)",
+        country: "Mexico",
+        countryCode: "MX",
+        flag: "🇲🇽",
+        category: "Cultural",
+        month: "November 1 - 2",
+        region: "Across Mexico (Oaxaca, Michoacán, Mexico City)",
+        image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=900&q=80",
+        snippet: "A joyful celebration honoring deceased loved ones with altars, marigolds, and sugar skulls.",
+        description: "Rather than a day of mourning, Día de los Muertos is a vibrant celebration of memory. Families build home altars ('ofrendas') adorned with orange marigold flowers, photos, pan de muerto, and favorite items of departed souls to guide them back home for a night.",
+        traditions: [
+          "Constructing multi-tiered Ofrendas (altars) decorated with marigolds (Cempasúchil)",
+          "Painting faces like iconic La Calavera Catrina skulls",
+          "Overnight candlelight vigils and music in grave sites",
+          "Carving decorated sugar skulls (calaveritas de azúcar)"
+        ],
+        foods: "Pan de Muerto (sweet egg bread), Tamales, Mole Negro, and Hot Chocolate.",
+        attire: "Catrina skeleton makeup, floral crowns, and elegant vintage suits/dresses."
+      },
+      {
+        id: "songkran",
+        name: "Songkran (Thai New Year)",
+        country: "Thailand",
+        countryCode: "TH",
+        flag: "🇹🇭",
+        category: "Cultural",
+        month: "April 13 - 15",
+        region: "Thailand (Chiang Mai, Bangkok, Phuket)",
+        image: "https://images.unsplash.com/photo-1583089892943-e02e5b017b6a?auto=format&fit=crop&w=900&q=80",
+        snippet: "Thailand's New Year celebration famous for giant, nationwide water bucket fights.",
+        description: "Songkran marks the sun's passage into a new zodiac phase. Water symbolizes cleansing and washing away bad luck from the previous year. What begins with solemn Buddhist water pourings transforms into nationwide joyful water fights using buckets and water pistols.",
+        traditions: [
+          "Bathing Buddha statues with fragrant water ('Rod Nam Dum Hua')",
+          "Respectful washing of elders' hands to seek blessings",
+          "Nationwide playful public water battles in streets",
+          "Making sand pagodas at Buddhist temples"
+        ],
+        foods: "Khao Chae (jasmine rice cooled in scented water), Pad Thai, and Mango Sticky Rice.",
+        attire: "Bright Hawaiian-style floral shirts and quick-drying summer clothes."
+      },
+      {
+        id: "harbin-ice",
+        name: "Harbin International Ice & Snow Festival",
+        country: "China",
+        countryCode: "CN",
+        flag: "🇨🇳",
+        category: "Seasonal",
+        month: "January - February",
+        region: "Harbin, Heilongjiang Province",
+        image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=80",
+        snippet: "A winter wonderland featuring colossal ice palaces and sculptures illuminated with LED lights.",
+        description: "Harbin's festival is the largest ice and snow festival in the world. Sculptors harvest massive ice blocks from the frozen Songhua River to construct full-scale ice castles, pagodas, and statues that glow brilliantly with interior colorful computer-controlled lights.",
+        traditions: [
+          "Illuminated night walks through life-sized ice cities",
+          "Ice swimming competitions in the frozen river",
+          "Snow slide races and alpine skiing exhibition",
+          "International ice sculpting competitions"
+        ],
+        foods: "Tanghulu (candied hawthorn skewers), Harbin red sausage, and boiling Hot Pot.",
+        attire: "Heavy Arctic winter gear, insulated thermal coats, gloves, and fleece boots."
+      },
+      {
+        id: "venice-carnival",
+        name: "Carnevale di Venezia (Venice Carnival)",
+        country: "Italy",
+        countryCode: "IT",
+        flag: "🇮🇹",
+        category: "Arts & Music",
+        month: "February (15 days before Ash Wednesday)",
+        region: "Venice",
+        image: "https://images.unsplash.com/photo-1514890547357-a9ee288728e0?auto=format&fit=crop&w=900&q=80",
+        snippet: "Enchanting historical festival famous for intricate Venetian masks and lavish period costumes.",
+        description: "Dating back to the 12th century, the Venice Carnival transforms the canal city into an elegant masquerade ball. Attendees wear hand-crafted porcelain masks and ornate Baroque period costumes, strolling through St. Mark's Square and riding gondolas.",
+        traditions: [
+          "'Flight of the Angel' zip-line ritual from St. Mark's Campanile bell tower",
+          "Best Mask Contest judged on St. Mark's Square stage",
+          "Candlelit gondola parades down the Grand Canal",
+          "Exclusive Grand Masquerade balls in historic Venetian palaces"
+        ],
+        foods: "Frittelle (sweet Venetian fried donuts), Galani pastries, and Bellini cocktails.",
+        attire: "Hand-painted Venetian porcelain masks (Bauta, Volto) paired with opulent 18th-century silk cloaks."
+      },
+      {
+        id: "cherry-blossom",
+        name: "Hanami (Cherry Blossom Festival)",
+        country: "Japan",
+        countryCode: "JP",
+        flag: "🇯🇵",
+        category: "Seasonal",
+        month: "March - April",
+        region: "Across Japan (Tokyo, Kyoto, Osaka)",
+        image: "https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=900&q=80",
+        snippet: "The ancient Japanese tradition of welcoming spring by picnicking beneath blooming sakura trees.",
+        description: "Hanami (flower viewing) celebrates the transience of beauty as pink cherry blossoms (sakura) bloom across Japan for just a few weeks. Friends and families gather on blue tarps beneath blossom-laden branches in parks to eat, drink, and write poetry.",
+        traditions: [
+          "Daytime picnics under blooming cherry blossom trees",
+          "Yozakura (night blossom viewing) illuminated by paper lanterns",
+          "Writing haiku poems dedicated to spring nature",
+          "Visiting historic temple gardens framed by pink flowers"
+        ],
+        foods: "Sakura Mochi (sweet pink rice cakes wrapped in cherry leaf), Bento boxes, Dango, and Sake.",
+        attire: "Casual spring attire or traditional Kimono for temple photo walks."
+      },
+      {
+        id: "inti-raymi",
+        name: "Inti Raymi (Festival of the Sun)",
+        country: "Peru",
+        countryCode: "PE",
+        flag: "🇵🇪",
+        category: "Harvest",
+        month: "June 24 (Winter Solstice)",
+        region: "Cusco & Sacsayhuamán",
+        image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=900&q=80",
+        snippet: "An ancient Inca ceremony honoring the Sun God Inti with colorful theatrical processions.",
+        description: "Inti Raymi was the most important Inca Empire festival. Recreated annually at the stone fortress of Sacsayhuamán in Cusco, hundreds of actors in authentic Inca costumes recreate rituals praising Inti for crop fertility and the winter solstice sun.",
+        traditions: [
+          "Ritual opening procession at the Qorikancha Sun Temple",
+          "Sapa Inca emperor ritual address to the four quarters of the empire",
+          "Traditional Quechua music with pan flutes and drums",
+          "Mock offerings of corn and chicha to the sun"
+        ],
+        foods: "Chiriuchu (traditional cold meat & corn dish), Pachamanca, and Chicha de Jora (fermented corn beer).",
+        attire: "Hand-woven Andean textiles, colorful tunics, feather headdresses, and gold ornament trim."
+      },
+      {
+        id: "up-helly-aa",
+        name: "Up Helly Aa (Viking Fire Festival)",
+        country: "UK",
+        countryCode: "GB",
+        flag: "🇬🇧",
+        category: "Cultural",
+        month: "Last Tuesday of January",
+        region: "Lerwick, Shetland Islands, Scotland",
+        image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80",
+        snippet: "Europe's largest Viking fire festival ending in the torching of a longship.",
+        description: "Up Helly Aa marks the end of the Yule season in Shetland, celebrating its Norse heritage. A squad of over 1,000 costumed 'guizers' lead a torchlight procession through total darkness, carrying a full-scale Viking longship before hurling 900 burning torches inside it.",
+        traditions: [
+          "Guizer Jarl squad march through Lerwick carrying axes and shields",
+          "Torchlight procession of 1,000 torch-bearers",
+          "Ceremonial burning of a hand-crafted Viking Galley longship",
+          "All-night hall dances and comedic performances"
+        ],
+        foods: "Shetland lamb stew, Bannocks, and Scotch Whisky.",
+        attire: "Authentic Norse Viking armor, chainmail, raven helmets, and sheepskin cloaks."
+      },
+      {
+        id: "loy-krathong",
+        name: "Loy Krathong & Yi Peng",
+        country: "Thailand",
+        countryCode: "TH",
+        flag: "🇹🇭",
+        category: "Religious",
+        month: "November (Full Moon of 12th lunar month)",
+        region: "Chiang Mai & Sukhotai",
+        image: "https://images.unsplash.com/photo-1514897575457-c4db467cf78e?auto=format&fit=crop&w=900&q=80",
+        snippet: "Floating lotus basket and glowing paper sky lantern release across Thailand's waterways.",
+        description: "Loy Krathong honors the Water Goddess Phra Mae Khongkha. People release decorated banana-leaf baskets ('krathongs') with candles on rivers. In Chiang Mai, it coincides with Yi Peng, releasing thousands of glowing sky lanterns ('khom loi') into the night sky.",
+        traditions: [
+          "Crafting lotus-shaped Krathongs from banana leaves and flowers",
+          "Releasing illuminated paper lanterns into the night sky",
+          "Making wishes and letting go of past grievances",
+          "Traditional Thai dance pageants on riverbanks"
+        ],
+        foods: "Sai Oua (northern Thai sausage), Som Tum (papaya salad), and Thai Iced Tea.",
+        attire: "Elegant traditional Thai silk clothes (Chut Thai)."
+      },
+      {
+        id: "nauryz",
+        name: "Nauryz / Nowruz (Persian & Turkic New Year)",
+        country: "Kazakhstan",
+        countryCode: "KZ",
+        flag: "🇰🇿",
+        category: "Harvest",
+        month: "March 21 - 23 (Vernal Equinox)",
+        region: "Central Asia, Iran, Azerbaijan",
+        image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=900&q=80",
+        snippet: "Ancient spring equinox celebration symbolizing renewal, unity, and abundance.",
+        description: "Celebrated for over 3,000 years across Central Asia and the Middle East, Nauryz welcomes spring. Yurt encampments are erected, horse-riding games are played, and communities gather to share Nauryz Kozhe soup representing 7 sacred life elements.",
+        traditions: [
+          "Setting up traditional nomadic Yurts and festive swings (Altybakan)",
+          "Kokpar horse-riding sport competitions",
+          "Spring house cleaning and planting flowers",
+          "Folk singing and Dombra music performances"
+        ],
+        foods: "Nauryz Kozhe (special 7-ingredient soup), Beshbarmak (noodle & horsemeat dish), and Baursaks (fried dough balls).",
+        attire: "Embroidered velvet Kazakh Shapan coats and traditional Saukele headwear."
+      }
+    ];
+
+    const CATEGORIES = ["All", "Cultural", "Religious", "Harvest", "Arts & Music", "Seasonal", "Food & Wine", "Carnival"];
+    
+    // State Management
+    let currentCategory = "All";
+    let selectedCountry = "";
+    let searchQuery = "";
+    let showingFavoritesOnly = false;
+    let savedBookmarks = JSON.parse(localStorage.getItem('festiverse_bookmarks') || '[]');
+
+    // DOM Elements
+    const gridEl = document.getElementById('festivalGrid');
+    const categoryTagsEl = document.getElementById('categoryTags');
+    const countryFilterEl = document.getElementById('countryFilter');
+    const searchInputEl = document.getElementById('searchInput');
+    const clearSearchBtnEl = document.getElementById('clearSearchBtn');
+    const sectionTitleEl = document.getElementById('sectionTitle');
+    const resultBadgeEl = document.getElementById('resultBadge');
+    const resetAllBtnEl = document.getElementById('resetAllBtn');
+    const bookmarkCountEl = document.getElementById('bookmarkCount');
+    const bookmarkTabBtnEl = document.getElementById('bookmarkTabBtn');
+    const randomBtnEl = document.getElementById('randomBtn');
+    const modalEl = document.getElementById('detailModal');
+    const aiPromptBoxEl = document.getElementById('aiPromptBox');
+    const missingSearchTermEl = document.getElementById('missingSearchTerm');
+    const fetchAiFestivalBtnEl = document.getElementById('fetchAiFestivalBtn');
+
+    // Initialize App
+    window.addEventListener('DOMContentLoaded', () => {
+      populateCountries();
+      renderCategoryTags();
+      updateBookmarkBadge();
+      renderFestivals();
+      setupEventListeners();
+    });
+
+    // Populate Country Dropdown dynamically from database + additional major nations
+    function populateCountries() {
+      const dbCountries = FESTIVAL_DATABASE.map(f => f.country);
+      const extraCountries = ["USA", "Japan", "Brazil", "Spain", "Germany", "Mexico", "China", "Italy", "UK", "Kazakhstan", "Peru", "Thailand", "India", "France", "Canada", "Australia", "South Korea", "Egypt"];
+      const allCountries = Array.from(new Set([...dbCountries, ...extraCountries])).sort();
+
+      allCountries.forEach(country => {
+        const option = document.createElement('option');
+        option.value = country;
+        option.textContent = country;
+        countryFilterEl.appendChild(option);
+      });
+    }
+
+    // Render Filter Tags
+    function renderCategoryTags() {
+      categoryTagsEl.innerHTML = CATEGORIES.map(cat => `
+        <button onclick="setCategory('${cat}')" 
+                class="px-4 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+                  currentCategory === cat 
+                    ? 'bg-brand-600 text-white border-brand-500 shadow-md shadow-brand-500/20' 
+                    : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-white'
+                }">
+          ${cat}
+        </button>
+      `).join('');
+    }
+
+    // Set Category Filter
+    function setCategory(cat) {
+      currentCategory = cat;
+      showingFavoritesOnly = false;
+      renderCategoryTags();
+      renderFestivals();
+    }
+
+    // Setup Event Handlers
+    function setupEventListeners() {
+      searchInputEl.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        clearSearchBtnEl.classList.toggle('hidden', searchQuery === '');
+        renderFestivals();
+      });
+
+      clearSearchBtnEl.addEventListener('click', () => {
+        searchInputEl.value = '';
+        searchQuery = '';
+        clearSearchBtnEl.classList.add('hidden');
+        renderFestivals();
+      });
+
+      countryFilterEl.addEventListener('change', (e) => {
+        selectedCountry = e.target.value;
+        renderFestivals();
+      });
+
+      randomBtnEl.addEventListener('click', exploreRandomFestival);
+      fetchAiFestivalBtnEl.addEventListener('click', queryGeminiForFestival);
+
+      // Close modal on outside click
+      modalEl.addEventListener('click', (e) => {
+        if (e.target === modalEl) closeModal();
+      });
+    }
+
+    // Filter Logic
+    function getFilteredFestivals() {
+      return FESTIVAL_DATABASE.filter(fest => {
+        // Favorites filter check
+        if (showingFavoritesOnly && !savedBookmarks.includes(fest.id)) {
+          return false;
+        }
+
+        // Category match
+        if (currentCategory !== "All" && fest.category !== currentCategory) {
+          return false;
+        }
+
+        // Country match (Optional filter)
+        if (selectedCountry && fest.country.toLowerCase() !== selectedCountry.toLowerCase()) {
+          return false;
+        }
+
+        // Keyword Search match
+        if (searchQuery) {
+          const matchName = fest.name.toLowerCase().includes(searchQuery);
+          const matchCountry = fest.country.toLowerCase().includes(searchQuery);
+          const matchDesc = fest.description.toLowerCase().includes(searchQuery);
+          const matchFood = fest.foods ? fest.foods.toLowerCase().includes(searchQuery) : false;
+          const matchTraditions = fest.traditions ? fest.traditions.some(t => t.toLowerCase().includes(searchQuery)) : false;
+          return matchName || matchCountry || matchDesc || matchFood || matchTraditions;
+        }
+
+        return true;
+      });
+    }
+
+    // Render Grid Cards
+    function renderFestivals() {
+      const festivals = getFilteredFestivals();
+
+      // Title & Reset button update
+      const isFiltered = currentCategory !== "All" || selectedCountry !== "" || searchQuery !== "" || showingFavoritesOnly;
+      resetAllBtnEl.classList.toggle('hidden', !isFiltered);
+      sectionTitleEl.textContent = showingFavoritesOnly ? "Saved Festivals" : "Global Festivals";
+      resultBadgeEl.textContent = `${festivals.length} found`;
+
+      if (festivals.length === 0) {
+        gridEl.innerHTML = `
+          <div class="col-span-full py-16 text-center">
+            <div class="w-16 h-16 bg-slate-900 border border-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500 text-2xl">
+              <i class="fa-solid fa-compass"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-300">No festivals matched your filters</h3>
+            <p class="text-sm text-slate-500 mt-1 max-w-md mx-auto">Try clearing country or keyword filters, or generate custom cultural data using the AI search option below.</p>
+          </div>
+        `;
+        
+        if (searchQuery || selectedCountry) {
+          missingSearchTermEl.textContent = searchQuery || selectedCountry;
+          aiPromptBoxEl.classList.remove('hidden');
+        } else {
+          aiPromptBoxEl.classList.add('hidden');
+        }
+        return;
+      }
+
+      aiPromptBoxEl.classList.add('hidden');
+
+      gridEl.innerHTML = festivals.map(fest => {
+        const isSaved = savedBookmarks.includes(fest.id);
+        return `
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden hover:border-slate-700 transition-all duration-300 flex flex-col group hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-500/5">
+            <!-- Card Image -->
+            <div class="relative h-48 w-full overflow-hidden bg-slate-950 cursor-pointer" onclick="openModal('${fest.id}')">
+              <img src="${fest.image}" alt="${fest.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
+              
+              <!-- Badges -->
+              <div class="absolute top-3 left-3 flex items-center gap-2">
+                <span class="px-2.5 py-1 bg-slate-950/80 backdrop-blur-md text-xs font-semibold text-slate-200 rounded-full border border-white/10 flex items-center gap-1.5">
+                  <span>${fest.flag || '🌐'}</span> ${fest.country}
+                </span>
+              </div>
+
+              <button onclick="event.stopPropagation(); toggleBookmark('${fest.id}')" 
+                      class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-950/70 backdrop-blur-md flex items-center justify-center text-xs transition border border-white/10 ${isSaved ? 'text-rose-500' : 'text-slate-400 hover:text-white'}">
+                <i class="fa-${isSaved ? 'solid' : 'regular'} fa-heart"></i>
+              </button>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+              <div class="space-y-2 cursor-pointer" onclick="openModal('${fest.id}')">
+                <div class="flex items-center justify-between text-xs text-festive-gold font-medium">
+                  <span><i class="fa-regular fa-calendar mr-1"></i> ${fest.month}</span>
+                  <span class="text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">${fest.category}</span>
+                </div>
+                <h3 class="font-bold text-lg text-white group-hover:text-brand-400 transition-colors line-clamp-1">${fest.name}</h3>
+                <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">${fest.snippet}</p>
+              </div>
+
+              <!-- Action Bar -->
+              <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                <span class="text-xs text-slate-500 flex items-center gap-1">
+                  <i class="fa-solid fa-map-pin"></i> ${fest.region || fest.country}
+                </span>
+                <button onclick="openModal('${fest.id}')" class="text-xs font-bold text-brand-500 hover:text-brand-400 flex items-center gap-1">
+                  Explore <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Modal Control
+    function openModal(id) {
+      const fest = FESTIVAL_DATABASE.find(f => f.id === id);
+      if (!fest) return;
+
+      document.getElementById('modalImg').src = fest.image;
+      document.getElementById('modalTitle').textContent = fest.name;
+      document.getElementById('modalCountryFlag').textContent = fest.flag || '🌐';
+      document.getElementById('modalCountry').textContent = fest.country;
+      document.getElementById('modalCategory').textContent = fest.category;
+      document.getElementById('modalDescription').textContent = fest.description;
+      document.getElementById('modalDate').querySelector('span').textContent = fest.month;
+      document.getElementById('modalRegion').querySelector('span').textContent = fest.region || fest.country;
+      document.getElementById('modalFoods').textContent = fest.foods || "Special local delicacies and festive snacks.";
+      document.getElementById('modalAttire').textContent = fest.attire || "Traditional folk attire and festive garments.";
+
+      // Traditions list
+      const traditionsListEl = document.getElementById('modalTraditions');
+      traditionsListEl.innerHTML = (fest.traditions || []).map(t => `
+        <li class="flex items-start gap-2 bg-slate-950/40 p-3 rounded-xl border border-slate-800/60">
+          <i class="fa-solid fa-check text-brand-500 mt-1"></i>
+          <span>${t}</span>
+        </li>
+      `).join('');
+
+      // Bookmark button state
+      const modalBmBtn = document.getElementById('modalBookmarkBtn');
+      const isSaved = savedBookmarks.includes(fest.id);
+      modalBmBtn.innerHTML = `<i class="fa-${isSaved ? 'solid' : 'regular'} fa-heart text-rose-500"></i> ${isSaved ? 'Saved' : 'Save'}`;
+      modalBmBtn.onclick = () => {
+        toggleBookmark(fest.id);
+        const newState = savedBookmarks.includes(fest.id);
+        modalBmBtn.innerHTML = `<i class="fa-${newState ? 'solid' : 'regular'} fa-heart text-rose-500"></i> ${newState ? 'Saved' : 'Save'}`;
+      };
+
+      modalEl.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modalEl.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
+
+    // Favorites / Bookmark Logic
+    function toggleBookmark(id) {
+      if (savedBookmarks.includes(id)) {
+        savedBookmarks = savedBookmarks.filter(item => item !== id);
+      } else {
+        savedBookmarks.push(id);
+      }
+      localStorage.setItem('festiverse_bookmarks', JSON.stringify(savedBookmarks));
+      updateBookmarkBadge();
+      renderFestivals();
+    }
+
+    function updateBookmarkBadge() {
+      bookmarkCountEl.textContent = savedBookmarks.length;
+    }
+
+    function toggleFavoritesOnly() {
+      showingFavoritesOnly = !showingFavoritesOnly;
+      bookmarkTabBtnEl.classList.toggle('border-rose-500', showingFavoritesOnly);
+      bookmarkTabBtnEl.classList.toggle('bg-rose-950/30', showingFavoritesOnly);
+      renderFestivals();
+    }
+
+    // Surprise Me / Random Festival
+    function exploreRandomFestival() {
+      showingFavoritesOnly = false;
+      resetFilters();
+      const randomIdx = Math.floor(Math.random() * FESTIVAL_DATABASE.length);
+      const fest = FESTIVAL_DATABASE[randomIdx];
+      openModal(fest.id);
+    }
+
+    // Reset Filters
+    function resetFilters() {
+      currentCategory = "All";
+      selectedCountry = "";
+      searchQuery = "";
+      showingFavoritesOnly = false;
+      searchInputEl.value = "";
+      countryFilterEl.value = "";
+      clearSearchBtnEl.classList.add('hidden');
+      bookmarkTabBtnEl.classList.remove('border-rose-500', 'bg-rose-950/30');
+      renderCategoryTags();
+      renderFestivals();
+    }
+
+    // Gemini API Integration for Minor/Unlisted Festivals
+    async function queryGeminiForFestival() {
+      const term = searchQuery || selectedCountry || "Global Minor Festival";
+      fetchAiFestivalBtnEl.disabled = true;
+      fetchAiFestivalBtnEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Querying Gemini AI...`;
+
+      try {
+        const prompt = `Provide detailed cultural information about the festival matching: "${term}". Respond ONLY with a single JSON object adhering to this structure:
+{
+  "name": "Full Festival Name",
+  "country": "Country Name",
+  "flag": "Country Emoji Flag",
+  "category": "Cultural", // choose from Cultural, Religious, Harvest, Arts & Music, Seasonal, Food & Wine, Carnival
+  "month": "Month or Season",
+  "region": "Specific city or region",
+  "snippet": "1 short summary sentence",
+  "description": "2-3 rich paragraphs detailing history and significance",
+  "traditions": ["Tradition 1", "Tradition 2", "Tradition 3", "Tradition 4"],
+  "foods": "Traditional foods eaten",
+  "attire": "Traditional clothing worn"
+}`;
+
+        const apiKey = ""; // Canvas runtime environment automatically passes key
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            tools: [{ "google_search": {} }],
+            generationConfig: { responseMimeType: "application/json" }
+          })
+        });
+
+        const data = await response.json();
+        const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (jsonText) {
+          const parsed = JSON.parse(jsonText);
+          const newId = "ai-" + Date.now();
+          
+          const newFest = {
+            id: newId,
+            name: parsed.name || term,
+            country: parsed.country || "Global",
+            flag: parsed.flag || "🌐",
+            category: parsed.category || "Cultural",
+            month: parsed.month || "Varies",
+            region: parsed.region || parsed.country || "Worldwide",
+            image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80",
+            snippet: parsed.snippet || "A fascinating cultural festival found via AI global research.",
+            description: parsed.description || "Detailed festival history fetched via Gemini AI.",
+            traditions: parsed.traditions || ["Traditional celebrations", "Music and gathering"],
+            foods: parsed.foods || "Local traditional cuisine.",
+            attire: parsed.attire || "Festive traditional wear."
+          };
+
+          FESTIVAL_DATABASE.unshift(newFest);
+          resetFilters();
+          openModal(newFest.id);
+        }
+      } catch (err) {
+        console.error("AI Generation Error:", err);
+      } finally {
+        fetchAiFestivalBtnEl.disabled = false;
+        fetchAiFestivalBtnEl.innerHTML = `<i class="fa-solid fa-robot mr-2"></i> Search World Archive with AI`;
+      }
+    }
+  </script>
+</body>
+</html>
